@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💍 Um Pix Especial pra Vocês</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow-x: hidden; color: #fff;
+    padding: 20px;
+  }
+
+  /* Tela 1 - Presente */
+  #gift-screen {
+    text-align: center; cursor: pointer;
+    transition: all 0.5s ease;
+    animation: float 2s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  .gift-box {
+    font-size: 130px; filter: drop-shadow(0 0 30px #f472b6);
+    animation: shake 1.5s infinite;
+  }
+  @keyframes shake {
+    0%,100% { transform: rotate(0deg); }
+    25% { transform: rotate(-6deg); }
+    75% { transform: rotate(6deg); }
+  }
+  #gift-screen h1 {
+    font-size: 28px; margin-top: 20px;
+    background: linear-gradient(90deg, #fbbf24, #f472b6, #a78bfa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  #gift-screen p { margin-top: 12px; color: #c7d2fe; font-size: 16px; }
+
+  /* Tela 2 - Comprovante */
+  #receipt-screen {
+    display: none; width: 100%; max-width: 420px;
+    animation: popIn 0.8s cubic-bezier(0.68,-0.55,0.27,1.55);
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .receipt {
+    background: #fff; color: #1f2937; border-radius: 20px;
+    padding: 28px 24px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    position: relative; overflow: hidden;
+  }
+  .receipt::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, #fbbf24, #f472b6, #a78bfa);
+  }
+  .bank-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  }
+  .bank-logo {
+    width: 40px; height: 40px; background: #be185d; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: bold; font-size: 20px;
+  }
+  .bank-header h2 { font-size: 18px; color: #111; }
+  .bank-header span { font-size: 12px; color: #6b7280; display: block; }
+
+  .check-circle { text-align: center; margin: 10px 0 20px; }
+  .check-circle .icon {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: #dcfce7; color: #16a34a;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
+    50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(22,163,74,0); }
+  }
+  .check-circle p { color: #16a34a; font-weight: 600; margin-top: 10px; font-size: 15px; }
+
+  .info-row {
+    display: flex; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px dashed #e5e7eb;
+    font-size: 14px;
+  }
+  .info-row:last-of-type { border-bottom: none; }
+  .info-row .label { color: #6b7280; }
+  .info-row .value { color: #111; font-weight: 600; text-align: right; max-width: 60%; }
+
+  .message-box {
+    margin-top: 22px; padding: 18px; border-radius: 14px;
+    background: linear-gradient(135deg, #fef3c7, #fce7f3);
+    border-left: 4px solid #f472b6;
+  }
+  .message-box h3 { color: #be185d; font-size: 15px; margin-bottom: 8px; }
+  .message-box p { color: #4b5563; font-size: 14px; line-height: 1.6; }
+
+  .buttons { display: flex; gap: 10px; margin-top: 20px; }
+  .btn {
+    flex: 1; padding: 14px; border: none; border-radius: 12px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, #be185d, #f472b6);
+    color: #fff; box-shadow: 0 8px 20px rgba(190,24,93,0.4);
+  }
+  .btn-primary:disabled { opacity: 0.6; cursor: wait; }
+  .btn-secondary { background: #f3f4f6; color: #374151; }
+
+  /* Carta modal */
+  #letter-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+    padding: 20px; z-index: 100;
+    animation: fadeIn 0.4s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .letter {
+    background: #fffaf0; color: #3f3f46;
+    max-width: 480px; width: 100%; max-height: 80vh;
+    overflow-y: auto; padding: 34px 30px;
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    font-family: 'Georgia', serif;
+    line-height: 1.8; font-size: 15px;
+    position: relative;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, #e5e7eb 28px);
+  }
+  .letter h2 {
+    font-family: 'Segoe UI', sans-serif;
+    color: #be185d; font-size: 22px; margin-bottom: 18px;
+    background: #fffaf0; display: inline-block; padding-right: 10px;
+  }
+  .letter p { margin-bottom: 14px; background: #fffaf0; }
+  .letter .sign { text-align: right; font-style: italic; margin-top: 24px; }
+  .close-btn {
+    position: sticky; top: 0; float: right;
+    background: #be185d; color: #fff; border: none;
+    width: 32px; height: 32px; border-radius: 50%;
+    cursor: pointer; font-size: 18px; line-height: 1;
+  }
+
+  /* Modal da imagem do comprovante */
+  #image-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+    padding: 20px; z-index: 200;
+    animation: fadeIn 0.3s;
+    flex-direction: column;
+    gap: 16px;
+  }
+  #image-modal img {
+    max-width: 100%; max-height: 75vh;
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+  }
+  #image-modal .hint {
+    color: #e5e7eb; font-size: 14px; text-align: center;
+    max-width: 360px; line-height: 1.5;
+  }
+  #image-modal .hint strong { color: #f472b6; }
+  #image-modal .fechar-img {
+    background: #be185d; color: #fff; border: none;
+    padding: 12px 24px; border-radius: 12px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+
+  .confetti {
+    position: fixed; width: 10px; height: 10px;
+    top: -10px; z-index: 50; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+  <!-- TELA 1 - PRESENTE -->
+  <div id="gift-screen" onclick="abrirPresente()">
+    <div class="gift-box">🎁</div>
+    <h1>Um presente especial pra vocês</h1>
+    <p>Toque na caixinha pra abrir 💝</p>
+  </div>
+
+  <!-- TELA 2 - COMPROVANTE -->
+  <div id="receipt-screen">
+    <div class="receipt" id="comprovante">
+      <div class="bank-header">
+        <div class="bank-logo">💜</div>
+        <div>
+          <h2>Banco do Amor</h2>
+          <span>Comprovante de Pix</span>
+        </div>
+      </div>
+
+      <div class="check-circle">
+        <div class="icon">✓</div>
+        <p>Pix enviado com sucesso!</p>
+      </div>
+
+      <div class="amount-label" style="font-size:16px; margin-bottom:22px; color:#be185d; font-weight:600;">
+        Presente de casamento 💍
+      </div>
+
+      <div class="info-row">
+        <span class="label">Para</span>
+        <span class="value">Alexsiana  & Josué 💕</span>
+      </div>
+      <div class="info-row">
+        <span class="label">De</span>
+        <span class="value">Artur De Sousa</span>
+      </div>
+      <div class="info-row">
+        <span class="label">ID da transação</span>
+        <span class="value">FELIZ-CASAMENTO</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Data</span>
+        <span class="value" id="dataHoje"></span>
+      </div>
+
+      <div class="message-box">
+        <h3>💌 Mensagem especial</h3>
+        <p>
+          Parabéns pelo casamento, casal lindo! Que esse Pix seja só um
+          pedacinho do quanto vocês merecem. Que a vida a dois de vocês
+          seja repleta de cumplicidade, risadas e amor todos os dias.
+          Amamos vocês! 🥂💍
+        </p>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-secondary" onclick="abrirCarta()">Ver carta 💌</button>
+      <button class="btn btn-primary" id="btnVer" onclick="mostrarComprovante()">
+        Ver comprovante 🖼️
+      </button>
+    </div>
+  </div>
+
+  <!-- CARTA -->
+  <div id="letter-modal" onclick="fecharCarta(event)">
+    <div class="letter" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="fecharCarta()">×</button>
+      <h2>Queridos Alexsiana  & Josué,</h2>
+
+      <p>Vocês escrevem o capítulo mais bonito da história de vocês —
+      e nós temos a honra de estar aqui pra testemunhar.</p>
+
+      <p>Ver vocês escolhendo um ao outro, diante de Deus, da família e dos
+      amigos, é ver o amor acontecendo de verdade. Aquele amor que não é só
+      sentimento, é escolha diária, é parceria, é lar.</p>
+
+      <p>Esse presente é simbólico, mas o carinho por trás dele é gigante.
+      Usem pra começar essa nova vida juntos: um jantar, uma viagem, um
+      detalhe da casa nova ou qualquer coisa que faça o coração de vocês
+      bater mais forte.</p>
+
+      <p>Que a união de vocês seja longa, leve e cheia de cumplicidade.
+      Que nos momentos difíceis vocês se lembrem do porquê escolheram
+      um ao outro. E que nos momentos felizes nunca falte risada, dança
+      na sala e cafuné.</p>
+
+      <p>Obrigado por nos deixarem fazer parte desse dia tão especial.
+      Que essa nova jornada seja exatamente do jeito que vocês sonharam —
+      e melhor ainda.</p>
+
+      <p class="sign">Com todo o nosso amor,<br>— Artur e Ana 💜</p>
+    </div>
+  </div>
+
+  <!-- MODAL DA IMAGEM DO COMPROVANTE -->
+  <div id="image-modal" onclick="fecharImagem(event)">
+    <img id="imgComprovante" src="" alt="Comprovante do Pix" onclick="event.stopPropagation()">
+    <p class="hint">
+      <strong>Segure o dedo na imagem</strong> para salvar ou compartilhar 💜
+    </p>
+    <button class="fechar-img" onclick="fecharImagem()">Fechar</button>
+  </div>
+
+<script>
+  // Data atual no comprovante
+  document.getElementById('dataHoje').textContent =
+    new Date().toLocaleDateString('pt-BR');
+
+  // Abrir presente
+  function abrirPresente() {
+    document.getElementById('gift-screen').style.display = 'none';
+    document.getElementById('receipt-screen').style.display = 'block';
+    chuvaDeConfete();
+  }
+
+  // Confetes
+  function chuvaDeConfete() {
+    const cores = ['#f472b6','#fbbf24','#a78bfa','#34d399','#60a5fa','#fb7185'];
+    for (let i = 0; i < 120; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = cores[Math.floor(Math.random() * cores.length)];
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      c.style.width = c.style.height = (6 + Math.random() * 10) + 'px';
+      c.style.animation = `cair ${2.5 + Math.random() * 2.5}s linear forwards`;
+      c.style.animationDelay = Math.random() * 0.8 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 6000);
+    }
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes cair {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Carta
+  function abrirCarta() {
+    document.getElementById('letter-modal').style.display = 'flex';
+  }
+  function fecharCarta(e) {
+    if (!e || e.target.id === 'letter-modal' || e.target.classList.contains('close-btn')) {
+      document.getElementById('letter-modal').style.display = 'none';
+    }
+  }
+
+  // ============================================================
+  // MOSTRAR COMPROVANTE COMO IMAGEM (usando arquivo Comprovante.png)
+  // ============================================================
+  function mostrarComprovante() {
+    // 👇 Aqui você coloca o caminho da sua imagem
+    document.getElementById('imgComprovante').src = 'Comprovante.jpeg';
+    document.getElementById('image-modal').style.display = 'flex';
+  }
+
+  // Fechar modal da imagem
+  function fecharImagem(e) {
+    if (!e || e.target.id === 'image-modal' || e.target.classList.contains('fechar-img')) {
+      document.getElementById('image-modal').style.display = 'none';
+    }
+  }
+</script>
+</body>
+</html>
